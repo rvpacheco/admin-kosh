@@ -42,6 +42,10 @@ function Categorias({swal}){
         setEditedCategory(Category);
         setName(Category.name);
         setParentCategory(Category.parent?._id);
+        setProperties(Category.properties.map(({name,values}) => ({
+            name,
+            values:values.join(',')
+        })));
     }
 
     function deleteCategory(Category){
@@ -139,6 +143,7 @@ function Categorias({swal}){
                         setEditedCategory(null);
                         setName('');
                         setParentCategory('')
+                        setProperties([]);
                     }} 
                         className="btn-default">
                         Cancelar

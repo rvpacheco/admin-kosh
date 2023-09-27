@@ -2,10 +2,15 @@ import multiparty from 'multiparty';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import fs from 'fs';
 import mime from 'mime-types';
+import {mongooseConnect} from "@/lib/mongoose";
+import {isAdminRequest} from "@/pages/api/auth/[...nextauth]";
 const bucketName = 'kosh-admin';
 
 
 export default async function handle(req,res) {
+    await mongooseConnect();
+    await isAdminRequest(req,res);
+    
     const form  = new multiparty.Form();
     const {fields,files} = await new Promise((resolve,reject) => {
         form.parse(req, (err, fields, files) => {
@@ -13,7 +18,7 @@ export default async function handle(req,res) {
             resolve({fields,files});
         });
     });
-    console.log('length:', files);
+    console.log('length:', files.file.length);
     const client = new S3Client({
         region: 'sa-east-1',
         credentials: {
@@ -26,7 +31,7 @@ export default async function handle(req,res) {
      for (const file of files.file){
         const ext = file.originalFilename.split('.').pop();
         const newFileName = Date.now() + '.' + ext;
-        console.log({ext,file});
+        
         await client.send(new PutObjectCommand({
             Bucket: bucketName,
             Key: newFileName,
