@@ -22,7 +22,7 @@ export default function OrdersPage() {
                 </thead>
                 <tbody>
                     {orders.length > 0 && orders.map(order => (
-                        <tr>
+                        <tr key={order._id}> {/* Asegúrate de que `order` tiene una propiedad `_id` única */}
                             <td>{order.createdAt}</td>
                             <td>
                                 {order.name} {order.email}<br/>
@@ -30,11 +30,12 @@ export default function OrdersPage() {
                                 {order.streetAddress}<br/>
                             </td>
                             <td>
-                                {order.line_items.map(l => (
-                                    <>
+                                {order.line_items.map((l, index) => (
+                                    // Envuelve los elementos en un div o fragmento con una key
+                                    <div key={index}> {/* Idealmente usa un identificador único si lo hay */}
                                         {l.price_data?.product_data.name}x
                                         {l.quantity}<br/>
-                                    </>
+                                    </div>
                                 ))}
                             </td>
                         </tr>
