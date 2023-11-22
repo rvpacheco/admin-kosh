@@ -11,9 +11,7 @@ export default function Layout({children}) {
       // Redirigir o manejar usuarios no autenticados
     },
   });
-  if (status === "loading") {
-    return <div>Loading...</div>;
-  }
+
 
   if (!session) {
     return (
