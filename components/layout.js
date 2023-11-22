@@ -5,12 +5,23 @@ import Logo from "./Logo";
 
 export default function Layout({children}) {
   const [showNav,setShowNav] = useState(false)
-  const { data: session } = useSession()
+  const { data: session, status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      // Redirigir o manejar usuarios no autenticados
+    },
+  });
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
+
   if (!session) {
     return (
       <div className="bg-gray-200 w-screen h-screen flex items-center">
-      <div className="text-center w-full">
-          <button onClick={() => signIn('google')} className="bg-white p-2 px-4 rounded-lg">Login with google</button>
+        <div className="text-center w-full">
+          <button onClick={() => signIn('google')} className="bg-white p-2 px-4 rounded-lg">
+            Login with google
+          </button>
         </div>
       </div>
     );
