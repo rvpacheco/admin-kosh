@@ -12,15 +12,10 @@ export default function ProductForm({
   images: existingImages,
   category: assignedCategory,
   properties: assignedProperties,
-  nacionalPrice,
-  italianoPrice,
-  piercingPrice,
-  especialPrice,
 }) {
   const [title, setTitle] = useState(existingTitle || "");
   const [description, setDescription] = useState(existingDescription || "");
-  const [price, setPrice] = useState(existingPrice || null);
-
+  const [price, setPrice] = useState(existingPrice || 0);
   const [category, setCategory] = useState(assignedCategory || "");
   const [productProperties, setProductProperties] = useState(assignedProperties || {});
   const [images, setImages] = useState(existingImages || []);
@@ -29,7 +24,7 @@ export default function ProductForm({
   const [categories, setCategories] = useState([]);
   const [weight, setWeight] = useState("");
   const [selectedPrice, setSelectedPrice] = useState("");
-  const [goldPrices, setGoldPrices] = useState({}); // Agregar estado para los precios de oro
+  const [goldPrices, setGoldPrices] = useState({});
   const [priceTypes, setPriceTypes] = useState([]);
 
   useEffect(() => {
@@ -38,33 +33,49 @@ export default function ProductForm({
     });
 
     // Obtener los precios de oro del servidor
-    axios.get("/api/savePrices").then((result) => {
-        // Obtener los tipos de oro del servidor y almacenarlos en el estado
-        setPriceTypes(Object.keys(result.data.prices));
-        setGoldPrices(result.data.prices);
-      });
-    }, []);
-    
+    axios.get("/api/getPrices").then((result) => {
+      setGoldPrices(result.data);
+      setPriceTypes(Object.keys(result.data));
+    });
+  }, []);
+  useEffect(() => {
+    if (weight && selectedPrice && goldPrices[selectedPrice]) {
+      const calculatedPrice = parseFloat(weight) * parseFloat(goldPrices[selectedPrice]);
+      setPrice(calculatedPrice);
+    }
+  }, [weight, selectedPrice, goldPrices]);
 
-    async function saveProduct(ev) {
-        ev.preventDefault();
-        try {
-          console.log("Weight:", weight);
-          console.log("Gold Price:", goldPrices[selectedPrice]);
-      
-          const multiplicacion = parseFloat(weight) * parseFloat(goldPrices[selectedPrice]);
-          console.log("Multiplicacion:", multiplicacion);
-      
-          setPrice(multiplicacion);
-          console.log("Precio después de la multiplicación:", multiplicacion);
-      
-          // Resto del código...
-        } catch (error) {
-          console.error("Error al guardar el producto:", error);
-        }
-      }
-      
-  
+
+  async function saveProduct(ev) {
+    ev.preventDefault();
+    const data = { title, description, price, images, category, properties: productProperties };
+    if (_id) {
+      //update
+
+      await axios.put('/api/products', { ...data, _id });
+    } else {
+      //create
+
+      await axios.post('/api/products', data);
+    }
+    setGoToProducts(true);
+    try {
+      console.log("Weight:", weight);
+      console.log("Gold Price:", goldPrices[selectedPrice]);
+
+      const multiplicacion = parseFloat(weight) * parseFloat(goldPrices[selectedPrice]);
+      console.log("Multiplicacion:", multiplicacion);
+
+      setPrice(multiplicacion);
+      console.log("Precio después de la multiplicación:", multiplicacion);
+
+      // Resto del código...
+    } catch (error) {
+      console.error("Error al guardar el producto:", error);
+    }
+  }
+
+
 
   const router = useRouter();
 
@@ -155,19 +166,22 @@ export default function ProductForm({
       <label>Descripción</label>
       <textarea placeholder="Descripción" value={description} onChange={(ev) => setDescription(ev.target.value)} />
       <label>Tipo de Oro</label>
-    <select value={selectedPrice} onChange={(ev) => setSelectedPrice(ev.target.value)}>
-      <option value="">Seleccionar</option>
-      {/* Utiliza el nuevo estado priceTypes para generar las opciones */}
-      {priceTypes.map((priceType) => (
-        <option key={priceType} value={goldPrices[priceType]}>
-          {priceType}
-        </option>
-      ))}
-    </select>
+      <select value={selectedPrice} onChange={(ev) => setSelectedPrice(ev.target.value)}>
+        <option value="">Seleccionar</option>
+        {priceTypes.map((priceType) => (
+          <option key={priceType} value={priceType}>
+            {priceType}
+          </option>
+        ))}
+      </select>
       <label>Peso</label>
       <input type="number" placeholder="Peso" value={weight} onChange={(ev) => setWeight(ev.target.value)} />
       <label>Precio</label>
       <input type="hidden" value={price} name="price" />
+      <div className="price-display">
+        <label>Precio</label>
+        <span>{price ? `$${price.toFixed(2)}` : 'Calculando...'}</span>
+      </div>
       <button type="submit" className="btn-primary">
         Guardar
       </button>
