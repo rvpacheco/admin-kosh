@@ -6,69 +6,38 @@ import ProductForm from "@/components/ProductForm";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
-  const [oroNacional, setOroNacional] = useState("");
-  const [oroItaliano, setOroItaliano] = useState("");
-  const [oroPiercing, setOroPiercing] = useState("");
-  const [oroEspecial, setOroEspecial] = useState("");
   const [showEditForm, setShowEditForm] = useState(false);
   const [Prices, setPrices] = useState({});
+  const [priceInputs, setPriceInputs] = useState({ nacional: '', italiano: '', piercing: '', especial: '' });
 
-  const toggleEditForm = () => {
-    setShowEditForm(!showEditForm);
-  };
-
+  const toggleEditForm = () => setShowEditForm(!showEditForm);
 
   useEffect(() => {
-    axios.get("/api/products").then((response) => {
-      setProducts(response.data);
-    });
+    const fetchProducts = axios.get("/api/products");
+    const fetchPrices = axios.get("/api/getPrices");
 
-    axios.get("/api/getPrices").then((response) => {
-      setPrices(response.data);
-    }).catch((error) => console.error("Error fetching prices:", error));
-    
+    Promise.all([fetchProducts, fetchPrices])
+      .then(([productsRes, pricesRes]) => {
+        setProducts(productsRes.data);
+        setPrices(pricesRes.data);
+      })
+      .catch(error => console.error("Error fetching data:", error));
   }, []);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
-    switch (id) {
-      case "nacional":
-        setOroNacional(value);
-        break;
-      case "italiano":
-        setOroItaliano(value);
-        break;
-      case "piercing":
-        setOroPiercing(value);
-        break;
-      case "especial":
-        setOroEspecial(value);
-        break;
-      default:
-        break;
-    }
+    setPriceInputs({ ...priceInputs, [id]: value });
   };
 
   const handleSavePrices = async (e) => {
     e.preventDefault();
-
-    // Puedes usar oroNacional, oroItaliano, oroPiercing, oroEspecial
-    // para enviar la información al servidor o realizar otras acciones.
-
-    // Ejemplo:
-    await axios.post('/api/savePrices', {
-      nacional: oroNacional,
-      italiano: oroItaliano,
-      piercing: oroPiercing,
-      especial: oroEspecial,
-    });
-
-    console.log("Precios guardados exitosamente:", {
-      nacional: oroNacional,
-      italiano: oroItaliano,
-      piercing: oroPiercing,
-      especial: oroEspecial,
-    });
+    try {
+      const response = await axios.post('/api/savePrices', priceInputs);
+      setPrices(priceInputs);
+      console.log("Precios guardados exitosamente:", response.data);
+    } catch (error) {
+      console.error("Error saving prices:", error);
+    }
   };
 
   return (

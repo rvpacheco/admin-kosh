@@ -1,99 +1,90 @@
 import Layout from "@/components/layout";
-import { Category } from "@/models/Category";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { withSwal } from "react-sweetalert2";
 
 function Categorias({ swal }) {
-
     const [editedCategory, setEditedCategory] = useState(null);
     const [name, setName] = useState('');
     const [parentCategory, setParentCategory] = useState('');
     const [categories, setCategories] = useState([]);
     const [properties, setProperties] = useState([]);
+
+    const fetchCategories = useCallback(async () => {
+        try {
+            const result = await axios.get('/api/categorias');
+            setCategories(result.data);
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+        }
+    }, []);
+
     useEffect(() => {
         fetchCategories();
-    }, [])
-    function fetchCategories() {
-        axios.get('/api/categorias').then(result => {
-            setCategories(result.data);
-        });
-    }
-    async function saveCategory(ev) {
+    }, [fetchCategories]);
+
+    const saveCategory = async (ev) => {
         ev.preventDefault();
         const data = {
-            name, parentCategory, properties: properties.map(p => ({
+            name,
+            parentCategory,
+            properties: properties.map(p => ({
                 name: p.name,
-                values: p.values.split(','),
+                values: p.values.split(',')
             }))
-        }
-        if (editedCategory) {
-            data._id = editedCategory._id;
-            await axios.put('/api/categorias', data);
-            setEditedCategory(null);
+        };
 
-        } else {
-            await axios.post('/api/categorias', data);
+        try {
+            if (editedCategory) {
+                data._id = editedCategory._id;
+                await axios.put('/api/categorias', data);
+                setEditedCategory(null);
+            } else {
+                await axios.post('/api/categorias', data);
+            }
+            setName('');
+            setParentCategory('');
+            setProperties([]);
+            fetchCategories();
+        } catch (error) {
+            console.error("Error saving category:", error);
         }
-        setName('');
-        setParentCategory('')
-        setProperties([])
-        fetchCategories();
-    }
-    function editCategory(Category) {
-        setEditedCategory(Category);
-        setName(Category.name);
-        setParentCategory(Category.parent?._id);
-        setProperties(Category.properties.map(({ name, values }) => ({
+    };
+
+    const editCategory = (category) => {
+        setEditedCategory(category);
+        setName(category.name);
+        setParentCategory(category.parent?._id);
+        setProperties(category.properties.map(({ name, values }) => ({
             name,
             values: values.join(',')
         })));
-    }
+    };
 
-    function deleteCategory(Category) {
-        swal.fire({
+    const deleteCategory = async (category) => {
+        const result = await swal.fire({
             title: 'Estas seguro',
-            text: `Quieres eliminar ${Category.name}?`,
+            text: `Quieres eliminar ${category.name}?`,
             showCancelButton: true,
             cancelButtonText: 'Cancelar',
             confirmButtonText: 'Si, eliminar!',
             confirmButtonColor: '#d55',
-        }).then(async result => {
-            if (result.isConfirmed) {
-                const { _id } = Category;
-                await axios.delete('/api/categorias?_id=' + _id);
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await axios.delete('/api/categorias?_id=' + category._id);
                 fetchCategories();
+            } catch (error) {
+                console.error("Error deleting category:", error);
             }
-        });
-    }
-    function addProperty() {
-        setProperties(prev => {
-            return [...prev, { name: '', values: '' }]
-        });
-    }
-    function handlePropertyNameChange(index, property, newName) {
-        setProperties(prev => {
-            const properties = [...prev];
-            properties[index].name = newName;
-            return properties;
-        });
-    }
-    function handlePropertyValuesChange(index, property, newValues) {
-        setProperties(prev => {
-            const properties = [...prev];
-            properties[index].values = newValues;
-            return properties;
-        });
-
-    }
-    function removeProperty(indexToRemove) {
-        setProperties(prev => {
-
-            return [...prev].filter((p, pIndex) => {
-                return pIndex !== indexToRemove;
-            });
-        });
+        }
     };
+
+    const addProperty = () => setProperties(prev => [...prev, { name: '', values: '' }]);
+    const handlePropertyChange = (index, type, newValue) => setProperties(prev => prev.map((property, idx) => idx === index ? { ...property, [type]: newValue } : property));
+    const removeProperty = (indexToRemove) => setProperties(prev => prev.filter((_, idx) => idx !== indexToRemove));
+
 
     return (
         <Layout>
