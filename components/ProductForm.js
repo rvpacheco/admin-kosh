@@ -3,6 +3,8 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import Spinner from "./Spinner";
 import { ReactSortable } from "react-sortablejs";
+import Image from "next/image";
+
 
 export default function ProductForm({
   _id,
@@ -146,7 +148,7 @@ export default function ProductForm({
         <ReactSortable list={images} className="flex flex-wrap gap-1" setList={updateImagesOrder}>
           {images.map((link) => (
             <div key={link} className="h-24">
-              <img src={link} alt="" />
+              <Image src={link} alt="" />
             </div>
           ))}
         </ReactSortable>
