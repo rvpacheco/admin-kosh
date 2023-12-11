@@ -1,4 +1,3 @@
-
 import { mongooseConnect } from "@/lib/mongoose";
 import { Product } from "@/models/Product";
 import { authOptions, isAdminRequest } from "./auth/[...nextauth]";
