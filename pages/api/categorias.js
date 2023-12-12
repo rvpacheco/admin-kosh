@@ -5,7 +5,7 @@ import { authOptions, isAdminRequest } from "./auth/[...nextauth]";
 export default async function handle(req, res) {
   try {
     await mongooseConnect();
-    await isAdminRequest(req, res);
+    
 
     const { method } = req;
     switch (method) {
