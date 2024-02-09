@@ -84,6 +84,17 @@ function Categorias({ swal }) {
     const addProperty = () => setProperties(prev => [...prev, { name: '', values: '' }]);
     const handlePropertyChange = (index, type, newValue) => setProperties(prev => prev.map((property, idx) => idx === index ? { ...property, [type]: newValue } : property));
     const removeProperty = (indexToRemove) => setProperties(prev => prev.filter((_, idx) => idx !== indexToRemove));
+    const handlePropertyNameChange = (index, property, newValue) => {
+        const updatedProperties = [...properties];
+        updatedProperties[index] = { ...property, name: newValue };
+        setProperties(updatedProperties);
+    };
+    const handlePropertyValuesChange = (index, property, newValue) => {
+        const updatedProperties = [...properties];
+        updatedProperties[index] = { ...property, values: newValue };
+        setProperties(updatedProperties);
+    };
+    
 
 
     return (
