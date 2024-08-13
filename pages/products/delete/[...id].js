@@ -1,3 +1,5 @@
+//pages/products/delete/[...id].js
+
 import Layout from "@/components/layout"
 import axios from "axios";
 import { useRouter } from "next/router";

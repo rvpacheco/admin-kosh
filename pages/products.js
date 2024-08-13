@@ -2,7 +2,19 @@ import Layout from "@/components/layout";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import ProductForm from "@/components/ProductForm";
+
+// Mapeo de categorías
+const categoryNames = {
+  '651300888d3e1551f2c5776e': 'Anillos',
+  '651340545e6fba84489f3748': 'Candongas',
+  '66ba7facdbdf1076f4a8f22e': 'Cadenas',
+  '651340755e6fba84489f3752': 'Dijes',
+  '65160fe9239a8ed1c3fb3ef1': 'Topos',
+  '6578e1b793f5c232ef764551': 'Piercing',
+  '662d10e3591a3e823820b98e': 'Bodas',
+  '662d10ee591a3e823820b991': 'Luxury',
+  '662d10fb591a3e823820b994': 'Pulsos'
+};
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -16,7 +28,6 @@ export default function Products() {
   const toggleEditForm = () => {
     setShowEditForm(!showEditForm);
   };
-
 
   useEffect(() => {
     axios.get("/api/products").then((response) => {
@@ -80,6 +91,8 @@ export default function Products() {
         <thead>
           <tr>
             <td>Nombre del producto</td>
+            <td>Categoría</td>
+            <td>Precio</td>
             <td></td>
           </tr>
         </thead>
@@ -87,6 +100,8 @@ export default function Products() {
           {products.map((product) => (
             <tr key={product._id}>
               <td>{product.title}</td>
+              <td>{categoryNames[product.category] || 'Sin categoría'}</td>
+              <td>{product.price ? `$${product.price}` : 'Sin precio'}</td>
               <td>
                 <Link href={"/products/edit/" + product._id}>
                   <svg
@@ -169,7 +184,6 @@ export default function Products() {
           </tr>
         </tbody>
       </table>
-
     </Layout>
   );
 }
