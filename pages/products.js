@@ -30,15 +30,16 @@ export default function Products() {
   };
 
   useEffect(() => {
-    axios.get("/api/products").then((response) => {
-      setProducts(response.data);
-    });
+    const fetchData = async () => {
+        const productsResponse = await axios.get("/api/products");
+        setProducts(productsResponse.data);
 
-    axios.get("/api/getPrices").then((response) => {
-      setPrices(response.data);
-    }).catch((error) => console.error("Error fetching prices:", error));
+        const pricesResponse = await axios.get("/api/getPrices");
+        setPrices(pricesResponse.data);
+    };
 
-  }, []);
+    fetchData().catch((error) => console.error("Error fetching data:", error));
+}, []);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -63,24 +64,30 @@ export default function Products() {
   const handleSavePrices = async (e) => {
     e.preventDefault();
 
-    // Puedes usar oroNacional, oroItaliano, oroPiercing, oroEspecial
-    // para enviar la información al servidor o realizar otras acciones.
-
-    // Ejemplo:
+    // Guardar los nuevos precios del oro
     await axios.post('/api/savePrices', {
-      nacional: oroNacional,
-      italiano: oroItaliano,
-      piercing: oroPiercing,
-      especial: oroEspecial,
+        nacional: oroNacional,
+        italiano: oroItaliano,
+        piercing: oroPiercing,
+        especial: oroEspecial,
     });
 
     console.log("Precios guardados exitosamente:", {
-      nacional: oroNacional,
-      italiano: oroItaliano,
-      piercing: oroPiercing,
-      especial: oroEspecial,
+        nacional: oroNacional,
+        italiano: oroItaliano,
+        piercing: oroPiercing,
+        especial: oroEspecial,
     });
-  };
+
+    // Actualizar los precios de los productos
+    await axios.post('/api/updateProductPrices');
+
+    // Cerrar el formulario
+    setShowEditForm(false);
+
+    // Recargar la página para reflejar los cambios
+    window.location.reload();
+};
 
   return (
     <Layout>

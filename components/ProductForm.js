@@ -14,6 +14,8 @@ export default function ProductForm({
   images: existingImages,
   category: assignedCategory,
   properties: assignedProperties,
+  weight: existingWeight, // Añadir el peso existente
+  goldType: existingGoldType, // Añadir el tipo de oro existente
 }) {
   const [title, setTitle] = useState(existingTitle || "");
   const [description, setDescription] = useState(existingDescription || "");
@@ -24,8 +26,9 @@ export default function ProductForm({
   const [goToProducts, setGoToProducts] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [categories, setCategories] = useState([]);
-  const [weight, setWeight] = useState("");
-  const [selectedPrice, setSelectedPrice] = useState("");
+  const [weight, setWeight] = useState(existingWeight || ""); // Inicializa con el peso existente
+  const [selectedPrice, setSelectedPrice] = useState(existingGoldType || ""); // Inicializa con el tipo de oro existente
+
   const [goldPrices, setGoldPrices] = useState({});
   const [priceTypes, setPriceTypes] = useState([]);
 
@@ -48,35 +51,28 @@ export default function ProductForm({
   }, [weight, selectedPrice, goldPrices]);
 
 
+
   async function saveProduct(ev) {
     ev.preventDefault();
-    const data = { title, description, price, images, category, properties: productProperties };
+    const data = {
+      title,
+      description,
+      price,
+      images,
+      category,
+      properties: productProperties,
+      weight, // Incluir el peso en los datos enviados
+      goldType: selectedPrice, // Incluir el tipo de oro en los datos enviados
+    };
     if (_id) {
-      //update
-
+      // update
       await axios.put('/api/products', { ...data, _id });
     } else {
-      //create
-
+      // create
       await axios.post('/api/products', data);
     }
     setGoToProducts(true);
-    try {
-      console.log("Weight:", weight);
-      console.log("Gold Price:", goldPrices[selectedPrice]);
-
-      const multiplicacion = parseFloat(weight) * parseFloat(goldPrices[selectedPrice]);
-      console.log("Multiplicacion:", multiplicacion);
-
-      setPrice(multiplicacion);
-      console.log("Precio después de la multiplicación:", multiplicacion);
-
-      // Resto del código...
-    } catch (error) {
-      console.error("Error al guardar el producto:", error);
-    }
   }
-
 
 
   const router = useRouter();
@@ -176,9 +172,9 @@ export default function ProductForm({
           </option>
         ))}
       </select>
+
       <label>Peso</label>
       <input type="number" placeholder="Peso" value={weight} onChange={(ev) => setWeight(ev.target.value)} />
-      <label>Precio</label>
       <input type="hidden" value={price} name="price" />
       <div className="price-display">
         <label>Precio</label>
