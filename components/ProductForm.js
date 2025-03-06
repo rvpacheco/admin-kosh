@@ -182,13 +182,15 @@ export default function ProductForm({
           <input type="file" onChange={uploadImages} className="hidden" />
         </label>
       </div>
-      <label>Tallas disponibles</label>
-      {[...Array(10).keys()].map((i) => (
-        <div key={i + 1} className="flex gap-2">
-          <span>Talla {i + 1}:</span>
-          <input type="number" min="0" value={sizes[i + 1] || ""} onChange={(ev) => updateSizes(i + 1, ev.target.value)} />
-        </div>
-      ))}
+      <label className="font-semibold">Tallas disponibles</label>
+      <div className="grid grid-cols-2 gap-4">
+        {[...Array(10).keys()].map((i) => (
+          <div key={i + 1} className="flex items-center gap-2 bg-gray-100 p-2 rounded">
+            <span className="text-sm font-medium">Talla {i + 1}:</span>
+            <input type="number" min="0" value={sizes[i + 1] || ""} onChange={(ev) => updateSizes(i + 1, ev.target.value)} className="w-16 p-1 border rounded" />
+          </div>
+        ))}
+      </div>
       <label>Descripción</label>
       <textarea placeholder="Descripción" value={description} onChange={(ev) => setDescription(ev.target.value)} />
       <label>Tipo de Oro</label>
