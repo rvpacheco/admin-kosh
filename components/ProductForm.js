@@ -16,6 +16,7 @@ export default function ProductForm({
   properties: assignedProperties,
   weight: existingWeight, // Añadir el peso existente
   goldType: existingGoldType, // Añadir el tipo de oro existente
+  
 }) {
   const [title, setTitle] = useState(existingTitle || "");
   const [description, setDescription] = useState(existingDescription || "");
@@ -31,6 +32,8 @@ export default function ProductForm({
 
   const [goldPrices, setGoldPrices] = useState({});
   const [priceTypes, setPriceTypes] = useState([]);
+    const [sizes, setSizes] = useState({});
+
 
   useEffect(() => {
     axios.get("/api/categorias").then((result) => {
@@ -63,6 +66,8 @@ export default function ProductForm({
       properties: productProperties,
       weight, // Incluir el peso en los datos enviados
       goldType: selectedPrice, // Incluir el tipo de oro en los datos enviados
+      sizes,
+
     };
     if (_id) {
       // update
@@ -105,6 +110,10 @@ export default function ProductForm({
 
   function removeImage(imageUrl) {
     setImages((prevImages) => prevImages.filter((image) => image !== imageUrl));
+  }
+
+  function updateSizes(talla, cantidad) {
+    setSizes((prev) => ({ ...prev, [talla]: cantidad }));
   }
 
 
@@ -173,6 +182,13 @@ export default function ProductForm({
           <input type="file" onChange={uploadImages} className="hidden" />
         </label>
       </div>
+      <label>Tallas disponibles</label>
+      {[...Array(10).keys()].map((i) => (
+        <div key={i + 1} className="flex gap-2">
+          <span>Talla {i + 1}:</span>
+          <input type="number" min="0" value={sizes[i + 1] || ""} onChange={(ev) => updateSizes(i + 1, ev.target.value)} />
+        </div>
+      ))}
       <label>Descripción</label>
       <textarea placeholder="Descripción" value={description} onChange={(ev) => setDescription(ev.target.value)} />
       <label>Tipo de Oro</label>
