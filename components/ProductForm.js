@@ -103,6 +103,11 @@ export default function ProductForm({
     setProductProperties((prev) => ({ ...prev, [propName]: value }));
   }
 
+  function removeImage(imageUrl) {
+    setImages((prevImages) => prevImages.filter((image) => image !== imageUrl));
+  }
+
+
   const propertiesToFill = [];
   if (categories.length > 0 && category) {
     let catInfo = categories.find(({ _id }) => _id === category);
@@ -142,9 +147,16 @@ export default function ProductForm({
       <label>Fotos</label>
       <div className="mb-2 flex flex-wrap gap-2">
         <ReactSortable list={images} className="flex flex-wrap gap-1" setList={updateImagesOrder}>
-          {images.map((link) => (
-            <div key={link} className="h-24">
-              <img src={link} alt="" />
+        {images.map((link) => (
+            <div key={link} className="relative h-24 w-24">
+              <img src={link} alt="" className="w-full h-full object-cover rounded-md" />
+              <button
+                type="button"
+                className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1 text-xs"
+                onClick={() => removeImage(link)}
+              >
+                ✕
+              </button>
             </div>
           ))}
         </ReactSortable>
