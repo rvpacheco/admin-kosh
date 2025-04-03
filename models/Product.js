@@ -10,6 +10,7 @@ const ProductSchema = new Schema({
     properties: { type: Object },
     weight: { type: Number }, // Nuevo campo para almacenar el peso
     goldType: { type: String }, // Nuevo campo para almacenar el tipo de oro
+    sizes: { type: Object },
 }, {
     timestamps: true,
 });
